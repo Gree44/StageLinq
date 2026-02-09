@@ -1,53 +1,35 @@
-import { extractMetadata, isExtensionSupported } from 'metadata-connect';
-import type { ExtractedMetadata } from 'metadata-connect';
+import type { ExtractedMetadata } from 'metadata-connect' with { "resolution-mode": "import" };
+export type { ExtractedMetadata } from 'metadata-connect' with { "resolution-mode": "import" };
+
 import type { FileTransfer } from '../services/FileTransfer';
 import { createFileTransferReader } from './reader';
 
-export type { ExtractedMetadata } from 'metadata-connect';
+type MetadataConnectModule = {
+  extractMetadata: (reader: unknown) => Promise<ExtractedMetadata>;
+  isExtensionSupported: (ext: string) => boolean;
+};
 
-/**
- * Extract metadata from an audio file on a StageLinQ device
- *
- * This function reads only the necessary bytes from the file header,
- * avoiding the need to transfer entire audio files over the network.
- *
- * @param fileTransfer - The FileTransfer service connected to the device
- * @param networkPath - The file path on the device (from TrackNetworkPath signal)
- * @returns Extracted metadata, or null if extraction fails
- *
- * @example
- * ```typescript
- * // When a track is loaded, extract its metadata
- * const metadata = await extractMetadataFromDevice(fileTransfer, trackNetworkPath);
- * if (metadata) {
- *   console.log(metadata.title, metadata.artist);
- *   if (metadata.artwork) {
- *     // Display artwork
- *   }
- * }
- * ```
- */
+let _metadataConnect: Promise<MetadataConnectModule> | undefined;
+
+function metadataConnect(): Promise<MetadataConnectModule> {
+  return (_metadataConnect ??= import('metadata-connect') as unknown as Promise<MetadataConnectModule>);
+}
+
 export async function extractMetadataFromDevice(
   fileTransfer: FileTransfer,
   networkPath: string
 ): Promise<ExtractedMetadata | null> {
-  // Skip streaming tracks (they don't have a file path)
-  if (networkPath.includes('streaming://')) {
-    return null;
-  }
+  if (networkPath.includes('streaming://')) return null;
 
-  // Get file extension and check if supported
+  const { extractMetadata, isExtensionSupported } = await metadataConnect();
+
   const extension = networkPath.split('.').pop()?.toLowerCase() ?? '';
-  if (!isExtensionSupported(extension)) {
-    return null;
-  }
+  if (!isExtensionSupported(extension)) return null;
 
   try {
     // Get file size
     const size = await fileTransfer.getFileSize(networkPath);
-    if (size === 0) {
-      return null;
-    }
+    if (size === 0) return null;
 
     // Create reader and extract metadata
     const reader = createFileTransferReader(fileTransfer, networkPath, size);

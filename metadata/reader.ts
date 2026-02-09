@@ -1,4 +1,4 @@
-import type { FileReader } from 'metadata-connect';
+import type { FileReader } from 'metadata-connect' with { "resolution-mode": "import" };
 import type { FileTransfer } from '../services/FileTransfer';
 
 /**
