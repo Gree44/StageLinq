@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
 		"target": "es2020",
-		"module": "commonjs",
+		"moduleResolution": "node16",
+		"module": "node16",
 		"outDir": "dist",
 		"sourceMap": true,
 		"allowJs": false,
@@ -13,8 +14,7 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true,
-		"moduleResolution": "node16"
+		"resolveJsonModule": true
 
 	},
 	"include": ["src/**/*.ts", "*.ts"],
