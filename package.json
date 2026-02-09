@@ -15,7 +15,8 @@
     "engine",
     "sc6000",
     "sc5000",
-    "prime4"
+    "prime4",
+    "prime4+"
   ],
   "scripts": {
     "test": "vitest run",
@@ -28,7 +29,8 @@
     "prepublishOnly": "npm run clean && npm run build && npm test",
     "release": "node .github/release.js",
     "release:patch": "node .github/release.js --patch",
-    "release:major": "node .github/release.js --major"
+    "release:major": "node .github/release.js --major",
+    "prepare": "npm run build"
   },
   "author": "Chris Le (TRIODE)",
   "license": "MIT",
@@ -45,7 +47,7 @@
     "console-stamp": "^3.0.3",
     "file-type": "^16.5.3",
     "ip": "^1.1.5",
-    "metadata-connect": "file:../metadata-connect",
+    "metadata-connect": "github:chrisle/metadata-connect",
     "minimist": "^1.2.5",
     "promise-socket": "^7.0.0"
   },
