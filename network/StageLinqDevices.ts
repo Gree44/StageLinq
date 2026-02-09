@@ -257,6 +257,12 @@ export class StageLinqDevices extends EventEmitter {
       this.emit('message', connectionInfo, data)
     });
 
+    const beatInfo = await networkDevice.connectToService(services_1.BeatInfo);
+    beatInfo.on("beatMessage", (beatData) => {
+    // beatData has { clock, deckCount, decks:[{beat,totalBeats,bpm,samples}] }
+    this.emit("beatMessage", connectionInfo, beatData);
+    });
+
     // Setup Player
     const player = new Player({
       stateMap: stateMap,

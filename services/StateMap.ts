@@ -77,6 +77,11 @@ export const States = [
   StageLinqValue.MixerChannelAssignment4,
   StageLinqValue.MixerNumberOfChannels,
 
+  StageLinqValue.EngineDeck1TrackSampleRate,
+  StageLinqValue.EngineDeck2TrackSampleRate,
+  StageLinqValue.EngineDeck3TrackSampleRate,
+  StageLinqValue.EngineDeck4TrackSampleRate,
+
 ];
 
 const MAGIC_MARKER = 'smaa';
