@@ -13,8 +13,10 @@
 		"esModuleInterop": true,
 		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"moduleResolution": "node16"
+
 	},
 	"include": ["src/**/*.ts", "*.ts"],
-	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.d.ts"],
+	"exclude": ["node_modules", "dist", "**/*.test.ts"],
 }

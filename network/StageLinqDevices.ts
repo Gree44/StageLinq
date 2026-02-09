@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 import { NetworkDevice } from '.';
 import { Player } from '../devices/Player';
 import { formatToken, sleep } from '../utils';
-import { FileTransfer, StateData, StateMap } from '../services';
+import { BeatInfo, FileTransfer, StateData, StateMap } from '../services';
 import { Logger } from '../LogEmitter';
 import { Databases } from '../Databases';
 
@@ -257,7 +257,7 @@ export class StageLinqDevices extends EventEmitter {
       this.emit('message', connectionInfo, data)
     });
 
-    const beatInfo = await networkDevice.connectToService(services_1.BeatInfo);
+    const beatInfo = await networkDevice.connectToService(BeatInfo);
     beatInfo.on("beatMessage", (beatData) => {
     // beatData has { clock, deckCount, decks:[{beat,totalBeats,bpm,samples}] }
     this.emit("beatMessage", connectionInfo, beatData);
