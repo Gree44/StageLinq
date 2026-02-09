@@ -22,6 +22,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "prepare": "npm run build",
     "start": "node dist/cli/index.js",
     "build": "tsc --build tsconfig.json",
     "watch": "tsc --build tsconfig.json -w",
@@ -29,8 +30,7 @@
     "prepublishOnly": "npm run clean && npm run build && npm test",
     "release": "node .github/release.js",
     "release:patch": "node .github/release.js --patch",
-    "release:major": "node .github/release.js --major",
-    "prepare": "npm run build"
+    "release:major": "node .github/release.js --major"
   },
   "author": "Chris Le (TRIODE)",
   "license": "MIT",
