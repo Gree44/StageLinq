@@ -1,5 +1,5 @@
 {
-  "name": "stagelinq",
+  "name": "@gree44/stagelinq",
   "version": "3.0.4",
   "description": "TypeScript library to connect to Denon StageLinq devices",
   "homepage": "https://github.com/chrisle/StageLinq",
