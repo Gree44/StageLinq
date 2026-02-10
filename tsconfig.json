@@ -17,11 +17,12 @@
 		"resolveJsonModule": true
   	},
 
-"include": ["**/*.ts"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "vitest.config.ts"
-  ]
+	"include": ["**/*.ts"],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"dist/**",
+		"**/*.test.ts",
+		"vitest.config.ts"
+	]
 }

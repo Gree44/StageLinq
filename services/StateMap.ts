@@ -82,6 +82,20 @@ export const States = [
   StageLinqValue.EngineDeck3TrackSampleRate,
   StageLinqValue.EngineDeck4TrackSampleRate,
 
+
+  StageLinqValue.EngineDeck1TrackTrackLength,
+  StageLinqValue.EngineDeck1TrackCurrentKeyIndex,
+  StageLinqValue.EngineDeck1Speed,
+  StageLinqValue.EngineDeck2TrackTrackLength,
+  StageLinqValue.EngineDeck2TrackCurrentKeyIndex,
+  StageLinqValue.EngineDeck2Speed,
+  StageLinqValue.EngineDeck3TrackTrackLength,
+  StageLinqValue.EngineDeck3TrackCurrentKeyIndex,
+  StageLinqValue.EngineDeck3Speed,
+  StageLinqValue.EngineDeck4TrackTrackLength,
+  StageLinqValue.EngineDeck4TrackCurrentKeyIndex,
+  StageLinqValue.EngineDeck4Speed,
+
 ];
 
 const MAGIC_MARKER = 'smaa';
