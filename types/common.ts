@@ -230,6 +230,8 @@ export enum StageLinqValue {
   ClientPreferencesPlayerJogColorB = '/Client/Preferences/PlayerJogColorB',
   EngineDeck1DeckIsMaster = '/Client/Deck1/DeckIsMaster',
   EngineDeck2DeckIsMaster = '/Client/Deck2/DeckIsMaster',
+  EngineDeck3DeckIsMaster = '/Client/Deck3/DeckIsMaster',
+  EngineDeck4DeckIsMaster = '/Client/Deck4/DeckIsMaster',
   ClientPreferencesLayerA = '/Client/Preferences/LayerA',
   EngineSyncNetworkMasterStatus = '/Engine/Sync/Network/MasterStatus',
   EngineMasterMasterTempo = '/Engine/Master/MasterTempo',
