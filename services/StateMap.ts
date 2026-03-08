@@ -39,6 +39,7 @@ export const States = [
 
   // Deck 1 telemetry
   StageLinqValue.EngineDeck1CurrentBPM,
+  StageLinqValue.EngineDeck1TrackCurrentBPM,
   StageLinqValue.EngineDeck1ExternalMixerVolume,
   StageLinqValue.EngineDeck1Play,
   StageLinqValue.EngineDeck1PlayState,
@@ -57,6 +58,7 @@ export const States = [
 
   // Deck 2 telemetry
   StageLinqValue.EngineDeck2CurrentBPM,
+  StageLinqValue.EngineDeck2TrackCurrentBPM,
   StageLinqValue.EngineDeck2ExternalMixerVolume,
   StageLinqValue.EngineDeck2Play,
   StageLinqValue.EngineDeck2PlayState,
@@ -75,6 +77,7 @@ export const States = [
 
   // Deck 3 telemetry
   StageLinqValue.EngineDeck3CurrentBPM,
+  StageLinqValue.EngineDeck3TrackCurrentBPM,
   StageLinqValue.EngineDeck3ExternalMixerVolume,
   StageLinqValue.EngineDeck3Play,
   StageLinqValue.EngineDeck3PlayState,
@@ -93,6 +96,7 @@ export const States = [
 
   // Deck 4 telemetry
   StageLinqValue.EngineDeck4CurrentBPM,
+  StageLinqValue.EngineDeck4TrackCurrentBPM,
   StageLinqValue.EngineDeck4ExternalMixerVolume,
   StageLinqValue.EngineDeck4Play,
   StageLinqValue.EngineDeck4PlayState,
