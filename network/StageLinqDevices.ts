@@ -7,6 +7,7 @@ import { BeatInfo, FileTransfer, StateData, StateMap } from '../services';
 import { Logger } from '../LogEmitter';
 import { Databases } from '../Databases';
 
+
 enum ConnectionStatus { CONNECTING, CONNECTED, FAILED };
 
 interface StageLinqDevice {
@@ -192,7 +193,7 @@ export class StageLinqDevices extends EventEmitter {
         this.emit('connected', connectionInfo);
 
         return; // Don't forget to return!
-      } catch(e) {
+      } catch (e) {
 
         // Failed connection. Sleep then retry.
         Logger.warn(`Could not connect to ${this.deviceId(connectionInfo)} ` +
@@ -259,8 +260,8 @@ export class StageLinqDevices extends EventEmitter {
 
     const beatInfo = await networkDevice.connectToService(BeatInfo);
     beatInfo.on("beatMessage", (beatData) => {
-    // beatData has { clock, deckCount, decks:[{beat,totalBeats,bpm,samples}] }
-    this.emit("beatMessage", connectionInfo, beatData);
+      // beatData has { clock, deckCount, decks:[{beat,totalBeats,bpm,samples}] }
+      this.emit("beatMessage", connectionInfo, beatData);
     });
 
     // Setup Player
@@ -326,9 +327,9 @@ export class StageLinqDevices extends EventEmitter {
     if (this.isIgnored(device)) return msg += '(IGNORED)';
     return msg += (
       this.isConnecting(device) ? '(CONNECTING)'
-      : this.isConnected(device) ? '(CONNECTED)'
-      : this.isFailed(device) ? '(FAILED)'
-      : '(NEW)');
+        : this.isConnected(device) ? '(CONNECTED)'
+          : this.isFailed(device) ? '(FAILED)'
+            : '(NEW)');
   }
 
 }
