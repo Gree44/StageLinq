@@ -15,7 +15,8 @@ import {
   LISTEN_PORT,
 } from '../types';
 import { createSocket, Socket as UDPSocket } from 'dgram';
-import { Logger } from '../LogEmitter';
+import type { Logger } from '../types/logger';
+import { noopLogger } from '../types/logger';
 import { networkInterfaces, platform } from 'os';
 import { strict as assert } from 'assert';
 import { subnet } from 'ip';
@@ -49,6 +50,10 @@ function findBroadcastTargets(): BroadcastTarget[] {
     if (!i || !i.length) continue;
     for (const entry of i) {
       if (entry.family === 'IPv4' && entry.internal === false) {
+        // Skip link-local addresses (169.254.x.x) — these are auto-configured
+        // interfaces that rarely host StageLinq devices
+        if (entry.address.startsWith('169.254.')) continue;
+
         const info = subnet(entry.address, entry.netmask);
         targets.push({
           broadcastIP: info.broadcastAddress,
@@ -74,6 +79,12 @@ let announceTimer: ReturnType<typeof setInterval> | null = null;
 /** Check if running on Windows */
 const isWindows = platform() === 'win32';
 
+/** Module-level logger, set by announce/unannounce */
+let moduleLogger: Logger = noopLogger;
+
+/** Track targets that have already warned about send failures */
+const warnedTargets: Set<string> = new Set();
+
 function writeDiscoveryMessage(p_ctx: WriteContext, p_message: DiscoveryMessage): number {
   let written = 0;
   written += p_ctx.writeFixedSizedString(DISCOVERY_MESSAGE_MARKER);
@@ -98,7 +109,7 @@ async function initUdpSocket(localIP?: string): Promise<UDPSocket> {
       const client = createSocket({type: 'udp4', reuseAddr: true});
 
       client.on('error', (err) => {
-        Logger.error(`UDP socket error: ${err}`);
+        moduleLogger.error(`UDP socket error: ${err}`);
         reject(err);
       });
 
@@ -114,7 +125,7 @@ async function initUdpSocket(localIP?: string): Promise<UDPSocket> {
         client.bind();
       }
     } catch (err) {
-      Logger.error(`Failed to create UDP socket for announcing: ${err}`);
+      moduleLogger.error(`Failed to create UDP socket for announcing: ${err}`);
       reject(err);
     }
   });
@@ -135,9 +146,9 @@ async function initWindowsSockets(): Promise<void> {
       try {
         const socket = await initUdpSocket(target.localIP);
         windowsSockets.set(target.localIP, socket);
-        Logger.debug(`Created broadcast socket for interface ${target.localIP}`);
+        moduleLogger.debug(`Created broadcast socket for interface ${target.localIP}`);
       } catch (err) {
-        Logger.warn(`Failed to create socket for interface ${target.localIP}: ${err}`);
+        moduleLogger.warn(`Failed to create socket for interface ${target.localIP}: ${err}`);
       }
     }
   }
@@ -151,7 +162,7 @@ function closeWindowsSockets(): void {
     try {
       socket.close();
     } catch (err) {
-      Logger.warn(`Error closing socket for ${ip}: ${err}`);
+      moduleLogger.warn(`Error closing socket for ${ip}: ${err}`);
     }
   }
   windowsSockets.clear();
@@ -174,7 +185,7 @@ async function broadcastMessage(p_message: Uint8Array): Promise<void> {
     const promises = targets.map(async (target) => {
       const socket = windowsSockets.get(target.localIP);
       if (!socket) {
-        Logger.warn(`No socket available for interface ${target.localIP}`);
+        moduleLogger.warn(`No socket available for interface ${target.localIP}`);
         return;
       }
 
@@ -186,9 +197,15 @@ async function broadcastMessage(p_message: Uint8Array): Promise<void> {
         socket.send(p_message, LISTEN_PORT, target.broadcastIP, (err) => {
           clearTimeout(timeout);
           if (err) {
-            Logger.warn(`Failed to send to ${target.broadcastIP}: ${err}`);
+            if (!warnedTargets.has(target.broadcastIP)) {
+              moduleLogger.warn(`Failed to send to ${target.broadcastIP}: ${err}`);
+              warnedTargets.add(target.broadcastIP);
+            } else {
+              moduleLogger.debug(`Failed to send to ${target.broadcastIP}: ${err}`);
+            }
             resolve(); // Don't reject, just log and continue
           } else {
+            warnedTargets.delete(target.broadcastIP);
             resolve();
           }
         });
@@ -207,9 +224,16 @@ async function broadcastMessage(p_message: Uint8Array): Promise<void> {
         announceClient!.send(p_message, LISTEN_PORT, broadcastIP, (err) => {
           clearTimeout(timeout);
           if (err) {
-            Logger.warn(`Failed to send to ${broadcastIP}: ${err}`);
+            if (!warnedTargets.has(broadcastIP)) {
+              moduleLogger.warn(`Failed to send to ${broadcastIP}: ${err}`);
+              warnedTargets.add(broadcastIP);
+            } else {
+              moduleLogger.debug(`Failed to send to ${broadcastIP}: ${err}`);
+            }
             resolve();
           } else {
+            // Clear warned state if a previously failing target recovers
+            warnedTargets.delete(broadcastIP);
             resolve();
           }
         });
@@ -224,9 +248,11 @@ async function broadcastMessage(p_message: Uint8Array): Promise<void> {
 /**
  * Stop announcing and send logout message
  */
-export async function unannounce(message: DiscoveryMessage): Promise<void> {
+export async function unannounce(message: DiscoveryMessage, logger: Logger = noopLogger): Promise<void> {
+  moduleLogger = logger;
+
   if (!announceTimer) {
-    Logger.warn('Announce timer has not started.');
+    moduleLogger.warn('Announce timer has not started.');
     return;
   }
   // Note: assertion removed to fix freezing issues on disconnect
@@ -247,15 +273,17 @@ export async function unannounce(message: DiscoveryMessage): Promise<void> {
     announceClient = null;
   }
 
-  Logger.info("Unannounced myself");
+  moduleLogger.info("Unannounced myself");
 }
 
 /**
  * Start announcing presence on the StageLinq network
  */
-export async function announce(message: DiscoveryMessage): Promise<void> {
+export async function announce(message: DiscoveryMessage, logger: Logger = noopLogger): Promise<void> {
+  moduleLogger = logger;
+
   if (announceTimer) {
-    Logger.log('Already has an announce timer.')
+    moduleLogger.debug('Already has an announce timer.')
     return;
   }
 
@@ -276,7 +304,7 @@ export async function announce(message: DiscoveryMessage): Promise<void> {
   await broadcastMessage(msg);
 
   announceTimer = setInterval(broadcastMessage, ANNOUNCEMENT_INTERVAL, msg);
-  Logger.info("Announced myself");
+  moduleLogger.info("Announced myself");
 }
 
 export interface DiscoveryMessageOptions {

@@ -2,7 +2,8 @@ import { EventEmitter } from 'events';
 import { PlayerLayerState, PlayerStatus, ServiceMessage } from '../types';
 import { PlayerMessageQueue } from './PlayerMessageQueue';
 import { StateData, StateMap } from '../services';
-import { Logger } from '../LogEmitter';
+import type { Logger } from '../types/logger';
+import { noopLogger } from '../types/logger';
 
 export declare interface Player {
   on(event: 'trackLoaded', listener: (status: PlayerStatus) => void): this;
@@ -17,6 +18,7 @@ interface PlayerOptions {
   address: string,
   port: number;
   deviceId: string;
+  logger?: Logger;
 }
 
 interface SourceAndTrackPath {
@@ -52,6 +54,7 @@ export class Player extends EventEmitter {
   private lastTrackNetworkPath: Map<string, string> = new Map();
   private queue: { [layer: string]: PlayerMessageQueue } = {};
   private deviceId: string;
+  private logger: Logger;
 
   /**
    * Initialize a player device.
@@ -61,6 +64,7 @@ export class Player extends EventEmitter {
    */
   constructor(options: PlayerOptions) {
     super();
+    this.logger = options.logger ?? noopLogger;
     options.stateMap.on('message', this.messageHandler.bind(this));
     this.address = options.address;
     this.port = options.port;
@@ -135,7 +139,7 @@ export class Player extends EventEmitter {
    * @param data
    */
   private handleUpdate(data: PlayerLayerState) {
-    Logger.debug(`data: ${JSON.stringify(data, null, 2)}`);
+    this.logger.debug(`data: ${JSON.stringify(data, null, 2)}`);
 
     const layer = data.layer;
 
@@ -153,12 +157,16 @@ export class Player extends EventEmitter {
     // This will be true once a song has been fully downloaded / loaded.
     const isSongLoaded = data.hasOwnProperty('songLoaded');
 
+    // Capture previous play state before merging
+    const previousState = this.decks.get(layer);
+    const wasPlaying = previousState?.playState === true;
+
     // If a new song is loaded drop all the previous track data.
     if (isNewTrack && isSongLoaded) {
-      Logger.debug(`Replacing state ${layer}`);
+      this.logger.debug(`Replacing state ${layer}`);
       this.decks.set(layer, data);
     } else {
-      Logger.debug(`Updating state ${layer}`);
+      this.logger.debug(`Updating state ${layer}`);
       this.decks.set(layer, { ...this.decks.get(layer), ...data });
     }
 
@@ -196,8 +204,14 @@ export class Player extends EventEmitter {
     if (isSongLoaded && currentState.trackNetworkPath)
       this.emit('trackLoaded', currentState);
 
-    // If the song is actually playing emit the nowPlaying event.
-    if (result?.playState) this.emit('nowPlaying', currentState);
+    // Only emit nowPlaying when play state transitions to true, or when a new
+    // track starts playing. Previously this fired on every state update
+    // (fader moves, BPM changes, etc.) which caused track duplication.
+    const isNowPlaying = result?.playState === true;
+    const playJustStarted = isNowPlaying && !wasPlaying;
+    const newTrackWhilePlaying = isNowPlaying && isNewTrack && isSongLoaded;
+    if (playJustStarted || newTrackWhilePlaying)
+      this.emit('nowPlaying', currentState);
 
     // Emit that the state has changed.
     this.emit('stateChanged', currentState);
