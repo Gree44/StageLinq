@@ -1,5 +1,51 @@
 # Change log
 
+## v3.1.0
+
+- npm install
+- fix(ci): publish no longer fails when several connect repos release together
+- chore: regenerate lockfile after dependency install
+- chore: update lockfile
+- chore: update lockfile
+- fix: reduce noise from idle StageLinQ polling
+- test: add nowPlaying emission tests for Player
+- fix: only emit nowPlaying on actual track changes
+- 3.0.9
+- emit more speed related data.
+- chore: regenerate lockfile for metadata-connect 1.1.4
+- feat: expose FileTransfer service for artwork extraction
+- chore: add npm publish verification step
+- 3.0.8
+- bpm correction
+- chore: update lockfiles
+- 3.0.7
+- emitting track bpm
+- 3.0.6
+- now emitting tracklength, key, speed, speedneutral
+- fix: replace console.debug with pluggable logger in DbConnection
+- refactor: replace stagelinq EventEmitter logger with pluggable logger interface
+- chore: bump metadata-connect to 1.1.2
+- fix: resolve security vulnerabilities in dependencies
+- 3.0.5
+- 3.1.1
+- 3.1.0
+- now emitting tracklength, key and speed
+- published
+- no stub
+- tsconfig
+- rimraf
+- renamed
+- node16
+- beatInfo import
+- ...
+- metadata-connect version
+- package.json
+- also emitting sampleRate
+- Update feature table header for TypeScript version
+- chore: update lockfiles
+- chore: update package-lock.json
+- feat: add metadata extraction with partial file reads
+
 ## v3.0.4
 
 - ci: trigger fresh workflow run
