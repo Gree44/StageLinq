@@ -27,12 +27,14 @@ async function main() {
     actingAs: ActingAsDevice.NowPlaying,
     downloadDbSources: false,
     maxRetries: 3,
+    logger: {
+      trace: () => {},
+      debug: () => {},
+      info: (msg, ...args) => console.info(msg, ...args),
+      warn: (msg, ...args) => console.warn(msg, ...args),
+      error: (msg, ...args) => console.error(msg, ...args),
+    },
   });
-
-  // Setup logging
-  stageLinq.logger.on('error', (...args: any) => console.error(...args));
-  stageLinq.logger.on('warn', (...args: any) => console.warn(...args));
-  stageLinq.logger.on('info', (...args: any) => console.info(...args));
 
   // Track connection
   stageLinq.devices.on('connected', (info) => {
